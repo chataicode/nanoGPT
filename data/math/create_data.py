@@ -228,42 +228,49 @@ def infix_pre_gan(nums_cnt, digit, level=1, integer=True, positive=True, Fs="+-*
 
 if __name__ == "__main__":
     datas = []
-
-    for i in range(0, 10000):
+    print("start")
+    print("step 1/7")
+    for i in tqdm(range(0, 10000)):
         infix = f"%d+%d"%(i // 100, i % 100)
         str_r = inference_step_by_step(f"(+ %d %d)"%(i // 100, i % 100))
         datas.append(f"{infix}={str_r}\n")
 
-    for i in range(0, 10000):
+    print("step 2/7")
+    for i in tqdm(range(0, 10000)):
         infix = f"%d*%d"%(i // 100, i % 100)
         str_r = inference_step_by_step(f"(* %d %d)"%(i // 100, i % 100))
         datas.append(f"{infix}={str_r}\n")
 
-    for n in range(2, 20):
+    print("step 3/7")
+    for n in tqdm(range(2, 20)):
         for i in range(10000):
             infix, pre = infix_pre_gan(nums_cnt=2, digit=n, level=1, integer=False, positive=False, Fs="+-")
             str_r = inference_step_by_step(pre)
             datas.append(f"{infix}={str_r}\n")
     
-    for n in range(2, 20):
+    print("step 4/7")
+    for n in tqdm(range(2, 20)):
         for i in range(10000):
             infix, pre = infix_pre_gan(nums_cnt=6, digit=n, level=1, integer=False, positive=False, Fs="+-")
             str_r = inference_step_by_step(pre)            
             datas.append(f"{infix}={str_r}\n")
     
-    for n in range(2, 10):
+    print("step 4/7")
+    for n in tqdm(range(2, 10)):
         for i in range(10000):
             infix, pre = infix_pre_gan(nums_cnt=2, digit=n, level=1, integer=False, positive=False, Fs="*")
             str_r = inference_step_by_step(pre)
             datas.append(f"{infix}={str_r}\n")
 
-    for n in range(2, 10):
+    print("step 6/7")
+    for n in tqdm(range(2, 10)):
         for i in range(10000):
             infix, pre = infix_pre_gan(nums_cnt=4, digit=n, level=1, integer=False, positive=False, Fs="+-*")
             str_r = inference_step_by_step(pre)
             datas.append(f"{infix}={str_r}\n")
 
-    for n in range(2, 6):
+    print("step 7/7")
+    for n in tqdm(range(2, 6)):
         for i in range(100000):
             infix, pre = infix_pre_gan(nums_cnt=4, digit=n, level=2, integer=False, positive=False, Fs="+-*")
             str_r = inference_step_by_step(pre)
