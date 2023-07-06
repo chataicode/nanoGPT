@@ -1,5 +1,20 @@
 
+# 四则运算
+## 测试
+```
+python sample.py --start="123*456+654.321*0.987="
+```
+## 训练
+```
+cd data/math/
+python create_data.py
+python prepare.py
+cd ../..
+python train config/train_math.py
+```
+
 # nanoGPT
+
 
 ![nanoGPT](assets/nanogpt.jpg)
 
