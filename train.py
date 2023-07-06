@@ -126,7 +126,7 @@ def get_batch(split):
     else:
         x, y = x.to(device), y.to(device)
     return x, y
-
+exec(open('configurator.py').read()) # overrides from command line or config file
 # init these up here, can override if init_from='resume' (i.e. from a checkpoint)
 iter_num = 0
 best_val_loss = 1e9
