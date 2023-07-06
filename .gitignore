@@ -5,7 +5,6 @@
 __pycache__/
 *.bin
 *.pkl
-*.pt
 *.pyc
 input.txt
 wandb/*
