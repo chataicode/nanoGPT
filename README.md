@@ -10,7 +10,7 @@ cd data/math/
 python create_data.py
 python prepare.py
 cd ../..
-python train config/train_math.py
+python train.py config/train_math.py
 ```
 
 # nanoGPT
