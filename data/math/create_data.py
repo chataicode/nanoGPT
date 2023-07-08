@@ -153,36 +153,7 @@ def inference_step_by_step(expr):
     except:
         print('Error:', expr)
 
-def expr_gan(v_cnt, digit=5, level=1, integer=True, positive=True, Fs="+-*"):
-        expr = ""
-        F = random.choice(list(Fs))
-        expr += f"({F}"
-        vs = []
-        for _ in range(random.randint(2, v_cnt)):
-            if level == 1:
-                if random.randint(0, 1) or integer:
-                    v = random.randint(0, 10**random.randint(1, digit))
-                    if not positive:
-                        v -= 10**random.randint(1, digit)//2
-                    expr += f' {v}'
-                    vs.append(f' {v} ')
-                else:
-                    v = random.random() * random.randint(0, 10**random.randint(1, digit))
-                    if not positive:
-                        v -= 10**random.randint(1, digit)//2
-                    dcnt = random.randint(1, digit)
-                    expr += f' %.{dcnt}f'%v
-                    vs.append(f' %.{dcnt}f '%v)
-            elif level > 1:
-                sub_expr, sub_v = expr_gan(v_cnt, digit, level-1, integer, positive, Fs)
-                expr += f' {sub_expr}'
-                vs.append(f' {sub_v} ')
-
-        expr += ")"
-        v = eval(F.join(vs))
-        return expr, v
-
-def infix_pre_gan(nums_cnt, digit, level=1, integer=True, positive=True, Fs="+-*", father_f=None):
+def infix_pre_gen(nums_cnt, digit, level=1, integer=True, positive=True, Fs="+-*", father_f=None):
     F = random.choice(list(Fs))
     if father_f == None:
         need_bracket = False
@@ -209,7 +180,7 @@ def infix_pre_gan(nums_cnt, digit, level=1, integer=True, positive=True, Fs="+-*
         infix, pre = [], []
         for i in range(random.randint(2, nums_cnt)):
             if random.random() < 0.5:
-                infix_, pre_ = infix_pre_gan(nums_cnt, digit, level-1, integer, positive, Fs, F)
+                infix_, pre_ = infix_pre_gen(nums_cnt, digit, level-1, integer, positive, Fs, F)
                 infix.append(infix_)
                 pre.append(pre_)
             else:
@@ -228,6 +199,7 @@ def infix_pre_gan(nums_cnt, digit, level=1, integer=True, positive=True, Fs="+-*
 
 if __name__ == "__main__":
     datas = []
+    cnt = 10000 #生成数据量
     print("start")
     print("step 1/7")
     for i in tqdm(range(0, 10000)):
@@ -242,37 +214,37 @@ if __name__ == "__main__":
         datas.append(f"{infix}={str_r}\n")
 
     print("step 3/7")
-    for n in tqdm(range(2, 20)):
-        for i in range(10000):
-            infix, pre = infix_pre_gan(nums_cnt=2, digit=n, level=1, integer=False, positive=False, Fs="+-")
+    for i in tqdm(range(cnt)):
+        for n in range(2, 20):
+            infix, pre = infix_pre_gen(nums_cnt=2, digit=n, level=1, integer=False, positive=False, Fs="+-")
             str_r = inference_step_by_step(pre)
             datas.append(f"{infix}={str_r}\n")
     
     print("step 4/7")
-    for n in tqdm(range(2, 20)):
-        for i in range(10000):
-            infix, pre = infix_pre_gan(nums_cnt=6, digit=n, level=1, integer=False, positive=False, Fs="+-")
+    for i in tqdm(range(cnt)):
+        for n in range(2, 20):
+            infix, pre = infix_pre_gen(nums_cnt=6, digit=n, level=1, integer=False, positive=False, Fs="+-")
             str_r = inference_step_by_step(pre)            
             datas.append(f"{infix}={str_r}\n")
     
-    print("step 4/7")
-    for n in tqdm(range(2, 10)):
-        for i in range(10000):
-            infix, pre = infix_pre_gan(nums_cnt=2, digit=n, level=1, integer=False, positive=False, Fs="*")
+    print("step 5/7")
+    for i in tqdm(range(cnt)):
+        for n in range(2, 10):
+            infix, pre = infix_pre_gen(nums_cnt=2, digit=n, level=1, integer=False, positive=False, Fs="*")
             str_r = inference_step_by_step(pre)
             datas.append(f"{infix}={str_r}\n")
 
     print("step 6/7")
-    for n in tqdm(range(2, 10)):
-        for i in range(10000):
-            infix, pre = infix_pre_gan(nums_cnt=4, digit=n, level=1, integer=False, positive=False, Fs="+-*")
+    for i in tqdm(range(cnt)):
+        for n in range(2, 10):
+            infix, pre = infix_pre_gen(nums_cnt=4, digit=n, level=1, integer=False, positive=False, Fs="+-*")
             str_r = inference_step_by_step(pre)
             datas.append(f"{infix}={str_r}\n")
 
     print("step 7/7")
-    for n in tqdm(range(2, 6)):
-        for i in range(100000):
-            infix, pre = infix_pre_gan(nums_cnt=4, digit=n, level=2, integer=False, positive=False, Fs="+-*")
+    for i in tqdm(range(cnt)):
+        for n in range(2, 6):
+            infix, pre = infix_pre_gen(nums_cnt=4, digit=n, level=2, integer=False, positive=False, Fs="+-*")
             str_r = inference_step_by_step(pre)
             datas.append(f"{infix}={str_r}\n")
 
