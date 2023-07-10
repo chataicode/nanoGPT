@@ -8,6 +8,27 @@ def inference_core(expr):
     expr = expr[1:-1]
     F = expr.split(' ')[0]
     V = expr.split(' ')[1:]
+
+    new_V = []
+    if F == '*':
+        for v in V:
+            if is_zero(v):
+                return '0'
+            elif v != '1':
+                new_V.append(v)
+        if len(new_V) == 0:
+            return '1'
+        else:
+            V = new_V
+    elif F == "+":
+        for v in V:
+            if not is_zero(v):
+                new_V.append(v)
+        if len(new_V) == 0:
+            return '0'
+        else:
+            V = new_V
+
     if len(V) == 1:
         a = V[0]
         if F == 'f':
@@ -92,12 +113,13 @@ def inference_core(expr):
                         # return f'{sign}{r}'
                 else:
                     next_expr = ''
-                    for i, bb in enumerate(b1):
-                        if bb != '0':
-                            next_expr += f' (* {a1} {bb})' + '0' * (len(b1) - i -1)
-                    return f'{sign}(+{next_expr})'
-                    # next_expr = f'(+ (* {a1} {b1[0]})' + '0' * (len(b1) - 1) + f' (* {a1} {b1[1:]}))'
-                    # return f'{sign}{next_expr}'
+                    # for i, bb in enumerate(b1):
+                    #     if bb != '0':
+                    #         next_expr += f' (* {a1} {bb})' + '0' * (len(b1) - i -1)
+                    # return f'{sign}(+{next_expr})'
+                    next_expr = f'(+ (* {a1} {b1[0]})' + '0' * (len(b1) - 1) + f' (* {a1} {b1[1:]}))'
+                    return f'{sign}{next_expr}'
+                
     else: # len(V) > 2
         if F == '-':
             a = V[0]
@@ -154,8 +176,15 @@ def inference_step_by_step(expr):
         return chain
     except:
         print('Error:', expr)
+        return None
 
-def infix_pre_gen(nums_cnt, digit, level=1, integer=True, positive=True, Fs="+-*", father_f=None):
+def is_zero(num_str):
+    for c in num_str:
+        if c not in '.0':
+            return False
+    return True
+
+def infix_pre_gen(nums_cnt, digit, level=1, integer=True, positive=True, Fs="+*", father_f=None):
     F = random.choice(list(Fs))
     if father_f == None:
         need_bracket = False
@@ -169,13 +198,15 @@ def infix_pre_gen(nums_cnt, digit, level=1, integer=True, positive=True, Fs="+-*
         for i in range(random.randint(2, nums_cnt)):
             num = random.randint(0, 10**random.randint(1, digit))
             if not integer and random.random() < 0.5:
-                num /= 10**random.randint(1, digit//2)
-            if not positive and random.random() < 0.1:
+                num /= 10**random.randint(0, digit//2)
+            if not positive and random.random() < 0.5:
                 num = -num
             nums.append(f"{num:.10f}".rstrip('0').rstrip('.'))
         infix = f"{F}".join(nums)
+        infix = infix.replace("+-", "-")
         if need_bracket:
             infix = f"({infix})"
+        nums = ['0' if is_zero(num) else num for num in nums]
         pre = f"({F} {' '.join(nums)})"
         return infix, pre
     else:
@@ -188,14 +219,17 @@ def infix_pre_gen(nums_cnt, digit, level=1, integer=True, positive=True, Fs="+-*
             else:
                 num = random.randint(0, 10**random.randint(1, digit))
                 if not integer and random.random() < 0.3:
-                    num /= 10**random.randint(1, digit//2)
+                    num /= 10**random.randint(0, digit//2)
                 if not positive and random.random() < 0.3:
                     num = -num
                 infix.append(f"{num:.10f}".rstrip('0').rstrip('.'))
                 pre.append(f"{num:.10f}".rstrip('0').rstrip('.'))
         infix = f"{F}".join(infix)
+        infix = infix.replace("+-", "-")
         if need_bracket:
             infix = f"({infix})"
+        
+        pre = ['0' if is_zero(num) else num for num in pre]
         pre = f"({F} {' '.join(pre)})"
         return infix, pre
 
@@ -208,56 +242,141 @@ def infix_pre_gen(nums_cnt, digit, level=1, integer=True, positive=True, Fs="+-*
 # exit()
 
 
+
 if __name__ == "__main__":
     datas = []
     cnt = 10000 #生成数据量
     print("start")
-    print("step 1/7")
+    print("step 1/14")
     for i in tqdm(range(0, 10000)):
         infix = f"%d+%d"%(i // 100, i % 100)
         str_r = inference_step_by_step(f"(+ %d %d)"%(i // 100, i % 100))
+        if str_r == None: continue
         datas.append(f"{infix}={str_r}\n")
 
-    print("step 2/7")
+    print("step 2/14")
     for i in tqdm(range(0, 10000)):
         infix = f"%d*%d"%(i // 100, i % 100)
         str_r = inference_step_by_step(f"(* %d %d)"%(i // 100, i % 100))
+        if str_r == None: continue
         datas.append(f"{infix}={str_r}\n")
 
-    print("step 3/7")
+    print("step 3/14")
     for i in tqdm(range(cnt)):
         for n in range(2, 20):
-            infix, pre = infix_pre_gen(nums_cnt=2, digit=n, level=1, integer=False, positive=False, Fs="+-")
+            infix, pre = infix_pre_gen(nums_cnt=2, digit=n, level=1, integer=False, positive=False, Fs="+")
             str_r = inference_step_by_step(pre)
+            if str_r == None: continue
             datas.append(f"{infix}={str_r}\n")
     
-    print("step 4/7")
+    print("step 4/14")
     for i in tqdm(range(cnt)):
         for n in range(2, 20):
-            infix, pre = infix_pre_gen(nums_cnt=6, digit=n, level=1, integer=False, positive=False, Fs="+-")
+            infix, pre = infix_pre_gen(nums_cnt=6, digit=n, level=1, integer=False, positive=False, Fs="+")
             str_r = inference_step_by_step(pre)            
+            if str_r == None: continue
             datas.append(f"{infix}={str_r}\n")
     
-    print("step 5/7")
+    print("step 5/14")
     for i in tqdm(range(cnt)):
         for n in range(2, 10):
             infix, pre = infix_pre_gen(nums_cnt=2, digit=n, level=1, integer=False, positive=False, Fs="*")
             str_r = inference_step_by_step(pre)
+            if str_r == None: continue
             datas.append(f"{infix}={str_r}\n")
 
-    print("step 6/7")
+    print("step 6/14")
     for i in tqdm(range(cnt)):
         for n in range(2, 10):
-            infix, pre = infix_pre_gen(nums_cnt=4, digit=n, level=1, integer=False, positive=False, Fs="+-*")
+            infix, pre = infix_pre_gen(nums_cnt=4, digit=n, level=1, integer=False, positive=False, Fs="+*")
             str_r = inference_step_by_step(pre)
+            if str_r == None: continue
             datas.append(f"{infix}={str_r}\n")
 
-    print("step 7/7")
+    print("step 7/14")
     for i in tqdm(range(cnt)):
         for n in range(2, 6):
-            infix, pre = infix_pre_gen(nums_cnt=4, digit=n, level=2, integer=False, positive=False, Fs="+-*")
+            infix, pre = infix_pre_gen(nums_cnt=4, digit=n, level=2, integer=False, positive=False, Fs="+*")
             str_r = inference_step_by_step(pre)
+            if str_r == None: continue
             datas.append(f"{infix}={str_r}\n")
+
+    print("step 8/14")
+    for i in tqdm(range(cnt)):
+        for n in range(2, 6):
+            infix, pre = infix_pre_gen(nums_cnt=20, digit=n, level=1, integer=True, positive=False, Fs="+")
+            str_r = inference_step_by_step(pre)
+            if str_r == None: continue
+            datas.append(f"{infix}={str_r}\n")
+
+    print("step 9/14")
+    for i in tqdm(range(cnt)):
+        for n in range(2, 6):
+            infix, pre = infix_pre_gen(nums_cnt=20, digit=n, level=1, integer=False, positive=False, Fs="+")
+            str_r = inference_step_by_step(pre)
+            if str_r == None: continue
+            datas.append(f"{infix}={str_r}\n")
+
+    print("step 10/14")
+    for i in tqdm(range(cnt)):
+        for n in range(2, 4):
+            infix, pre = infix_pre_gen(nums_cnt=6, digit=n, level=2, integer=True, positive=False, Fs="+*")
+            str_r = inference_step_by_step(pre)
+            if str_r == None: continue
+            datas.append(f"{infix}={str_r}\n")
+
+    print("step 11/14")
+    for i in tqdm(range(cnt)):
+        for n in range(2, 4):
+            infix, pre = infix_pre_gen(nums_cnt=6, digit=n, level=2, integer=False, positive=False, Fs="+*")
+            str_r = inference_step_by_step(pre)
+            if str_r == None: continue
+            datas.append(f"{infix}={str_r}\n")
+
+    print("step 12/14")
+    for i in tqdm(range(cnt)):
+        for n in range(1, 3):
+            infix, pre = infix_pre_gen(nums_cnt=10, digit=n, level=2, integer=True, positive=False, Fs="+*")
+            str_r = inference_step_by_step(pre)
+            if str_r == None: continue
+            datas.append(f"{infix}={str_r}\n")
+
+    print("step 13/14")
+    for i in tqdm(range(cnt)):
+        for n in range(1, 3):
+            infix, pre = infix_pre_gen(nums_cnt=10, digit=n, level=2, integer=False, positive=False, Fs="+*")
+            str_r = inference_step_by_step(pre)
+            if str_r == None: continue
+            datas.append(f"{infix}={str_r}\n")
+
+    print("step 14/14")
+    for i in tqdm(range(0, 1000)):
+        for d in range(1, 20):
+            num = random.randint(0, 10**random.randint(1, d))
+            if random.random() < 0.5:
+                num /= 10**random.randint(0, d//2)
+            if random.random() < 0.5:
+                num = -num
+            num = f"{num:.10f}".rstrip('0').rstrip('.')
+        
+            z = random.choice(["0", ] + ["0." + "0" * i for i in range(1, 10)])
+            infix = f"{num}+{z}".replace("+-", "-")
+            str_r = inference_step_by_step(f"(+ {num} 0)")
+            datas.append(f"{infix}={str_r}\n")
+
+            infix = f"{z}+{num}".replace("+-", "-")
+            str_r = inference_step_by_step(f"(+ 0 {num})")
+            datas.append(f"{infix}={str_r}\n")
+    
+    #过滤调可能推倒有误的
+    new_datas = []
+    for data in datas:
+        infix, result = data.strip().split('=')[0], data.strip().split('=')[-1]
+        if abs(eval(infix) - float(result)) > abs(float(result)*1e-10):
+            print(infix)
+        else:
+            new_datas.append(data)
+    datas = new_datas
 
     random.shuffle(datas)
     # datas = sorted(datas, key=lambda data: len(data))
