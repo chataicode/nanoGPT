@@ -28,17 +28,17 @@ def inference_core(expr):
             if '.' not in a:
                 a += '.'
             a1, a2 = a.split('.')
-            if F[1] == '-':
-                dd = int(F[2:])
-                if len(a1) <= dd:
-                    a1 = '0' * (dd - len(a1) + 1) + a1
-                a = a1[:-dd] + '.' + a1[-dd:] + a2
-                a = a.rstrip('0')
-            else:
-                dd = int(F[1:])
-                if len(a2) < dd:
-                    a2 += '0' * (dd - len(a2))
-                a = a1 + a2[:dd] + '.' + a2[dd:]
+            # if F[1] == '-':
+            dd = int(F[1:])
+            if len(a1) <= dd:
+                a1 = '0' * (dd - len(a1) + 1) + a1
+            a = a1[:-dd] + '.' + a1[-dd:] + a2
+            a = a.rstrip('0')
+            # else:
+            #     dd = int(F[1:])
+            #     if len(a2) < dd:
+            #         a2 += '0' * (dd - len(a2))
+            #     a = a1 + a2[:dd] + '.' + a2[dd:]
             if a[-1] == '.':
                 a = a[:-1]
             return f'{sign}{a}'
@@ -51,15 +51,17 @@ def inference_core(expr):
         b1, b2 = (b+'.').split('.')[:2]
         a2, b2 = a2.rstrip('0'), b2.rstrip('0')
         if a2 != '' or b2 != '':
-            dd = max(len(a2), len(b2))
-            a2 += '0' * (dd - len(a2))
-            b2 += '0' * (dd - len(b2))
-            a = str(int(a1 + a2))
-            b = str(int(b1 + b2))
             if F in '+-':
-                return f'(e-{dd} ({F} {a} {b}))'
+                dd = max(len(a2), len(b2))
+                a2 += '0' * (dd - len(a2))
+                b2 += '0' * (dd - len(b2))
+                a = str(int(a1 + a2))
+                b = str(int(b1 + b2))
+                return f'(e{dd} ({F} {a} {b}))'
             elif F == '*':
-                return f'(e-{dd*2} ({F} {a} {b}))'
+                a = str(int(a1 + a2))
+                b = str(int(b1 + b2))
+                return f'(e{len(a2)+len(b2)} ({F} {a} {b}))'
             elif F == '/':
                 return f'({F} {a} {b})'
             else:
@@ -89,13 +91,13 @@ def inference_core(expr):
                         # r = str(r)
                         # return f'{sign}{r}'
                 else:
-                    # next_expr = ''
-                    # for i, bb in enumerate(b1):
-                    #     if bb != '0':
-                    #         next_expr += f' (* {a1} {bb})' + '0' * (len(b1) - i -1)
-                    # return f'{sign}(+{next_expr})'
-                    next_expr = f'(+ (* {a1} {b1[0]})' + '0' * (len(b1) - 1) + f' (* {a1} {b1[1:]}))'
-                    return f'{sign}{next_expr}'
+                    next_expr = ''
+                    for i, bb in enumerate(b1):
+                        if bb != '0':
+                            next_expr += f' (* {a1} {bb})' + '0' * (len(b1) - i -1)
+                    return f'{sign}(+{next_expr})'
+                    # next_expr = f'(+ (* {a1} {b1[0]})' + '0' * (len(b1) - 1) + f' (* {a1} {b1[1:]}))'
+                    # return f'{sign}{next_expr}'
     else: # len(V) > 2
         if F == '-':
             a = V[0]
@@ -196,6 +198,15 @@ def infix_pre_gen(nums_cnt, digit, level=1, integer=True, positive=True, Fs="+-*
             infix = f"({infix})"
         pre = f"({F} {' '.join(pre)})"
         return infix, pre
+
+
+# random.seed(0)
+# infix, pre = infix_pre_gen(nums_cnt=4, digit=6, level=2, integer=False, positive=False, Fs="+-*")
+# str_r = inference_step_by_step(pre)
+# print(f"{infix}={str_r}")
+# print(len(infix) + len(str_r)) #优化前 2034
+# exit()
+
 
 if __name__ == "__main__":
     datas = []
